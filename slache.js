@@ -104,7 +104,18 @@ class Slache extends EventEmitter {
       if (!ids || !Array.isArray(ids) || ids.length === 0) {
         return callback(null, [])
       }
-      self.kv.mget(ids, callback)
+      ids = ids.map(id => userKey(teamId, id))
+      let allusers = []
+      let getUsers = (min, max) => {
+        max = (max >= ids.length) ? ids.length : max
+        self.kv.mget(ids.slice(min, max), (err, users) => {
+          if (err) return callback(err)
+          allusers = allusers.concat(users)
+          if (max === ids.length) return callback(null, allusers)
+          getUsers(max, max + 250)
+        })
+      }
+      getUsers(0, 250)
     })
   }
 
