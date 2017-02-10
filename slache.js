@@ -101,6 +101,9 @@ class Slache extends EventEmitter {
     let self = this
     self.kv.get(usersKey(teamId), (err, ids) => {
       if (err) return callback(err)
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        callback(null, [])
+      }
       self.kv.mget(ids, callback)
     })
   }
